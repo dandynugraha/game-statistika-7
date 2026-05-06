@@ -49,7 +49,17 @@ img { display: block; max-width: 100%; }
   padding: 20px;
   transition: opacity 0.6s ease, visibility 0.6s ease;
 }
-#ready-gate.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+#ready-gate.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#ready-gate.removed {
+  display: none;
+}
+
 #ready-gate::before {
   content: ''; position: absolute; inset: 0;
   background-image:
@@ -159,14 +169,21 @@ img { display: block; max-width: 100%; }
   position: fixed; inset: 0;
   background: var(--green-darkest);
   z-index: 9999;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  visibility: hidden;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   opacity: 0;
-  transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
+  transition: opacity 0.6s ease-out;
 }
-#loading-screen.active { visibility: visible; opacity: 1; }
-#loading-screen.hidden { opacity: 0; visibility: hidden; }
+#loading-screen.active {
+  display: flex;
+  opacity: 1;
+}
+#loading-screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
 #loading-screen::before {
   content: ''; position: absolute; inset: 0;
   background-image:
@@ -1137,6 +1154,38 @@ const audioManager = (function() {
   });
 
   return { play, pause, toggle, fadeOut };
+})();
+
+/* ========== READY GATE ========== */
+(function() {
+  const gate = document.getElementById('ready-gate');
+  const button = document.getElementById('ready-button');
+  const loadingScreen = document.getElementById('loading-screen');
+  let started = false;
+
+  document.body.style.overflow = 'hidden';
+
+  button.addEventListener('click', () => {
+    if (started) return;
+    started = true;
+
+    // Trigger audio (user interaction = autoplay allowed)
+    audioManager.play();
+
+    // Show loading screen FIRST so it's underneath ready-gate
+    loadingScreen.classList.add('active');
+
+    // Start loading sequence right away
+    startLoadingSequence();
+
+    // Then fade out ready-gate over it
+    gate.classList.add('hidden');
+
+    // Fully remove ready-gate from DOM flow after fade completes
+    setTimeout(() => {
+      gate.classList.add('removed');
+    }, 700);
+  });
 })();
   
 /* ========== LOADING SEQUENCE ========== */
