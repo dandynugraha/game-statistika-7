@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
 <title>NINJA STATIS 7 — Kelompok 7 Statistika ST21</title>
-<meta name="description" content="Game pixel art untuk penelitian statistika tentang air minum dan produktivitas mahasiswa. Dibuat oleh Kelompok 7 Statistika ST21." />
+<meta name="description" content="Game pixel art untuk penelitian statistika tentang air minum dan produktivitas mahasiswa." />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,6 +36,124 @@ body {
 }
 img { display: block; max-width: 100%; }
 
+/* ========== READY GATE (PRE-LOADING) ========== */
+#ready-gate {
+  position: fixed;
+  inset: 0;
+  background: var(--green-darkest);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+#ready-gate.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+#ready-gate::before {
+  content: ''; position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(116, 163, 52, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(116, 163, 52, 0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: gridShift 30s linear infinite;
+}
+
+.ready-question {
+  font-family: var(--font-pixel);
+  font-size: clamp(20px, 5vw, 48px);
+  color: var(--cream);
+  letter-spacing: 4px;
+  text-align: center;
+  margin-bottom: 60px;
+  position: relative;
+  z-index: 2;
+  text-shadow: 4px 4px 0 var(--green-darkest), 8px 8px 0 rgba(0, 0, 0, 0.3);
+  animation: readyPulse 1.6s ease-in-out infinite;
+}
+@keyframes readyPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 20px rgba(212, 160, 23, 0.4));
+  }
+  50% {
+    transform: scale(1.04);
+    filter: drop-shadow(0 0 40px rgba(212, 160, 23, 0.8)) drop-shadow(0 0 60px rgba(116, 163, 52, 0.4));
+  }
+}
+
+.ready-typing {
+  display: inline-block;
+  overflow: hidden;
+  border-right: 4px solid var(--gold);
+  white-space: nowrap;
+  animation: typing 2s steps(15, end), caretBlink 0.8s step-end infinite;
+}
+@keyframes typing {
+  from { max-width: 0; }
+  to { max-width: 100%; }
+}
+@keyframes caretBlink {
+  from, to { border-color: transparent; }
+  50% { border-color: var(--gold); }
+}
+
+.ready-button {
+  font-family: var(--font-pixel);
+  font-size: clamp(14px, 2.6vw, 22px);
+  color: var(--green-darkest);
+  background: var(--gold);
+  padding: clamp(20px, 3vw, 28px) clamp(40px, 6vw, 70px);
+  border: 4px solid var(--green-darkest);
+  cursor: pointer;
+  letter-spacing: 4px;
+  position: relative;
+  z-index: 2;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 0 4px var(--gold), 0 8px 0 var(--brown), 0 8px 30px rgba(212, 160, 23, 0.5);
+  animation: readyBtnPulse 2s ease-in-out infinite;
+  opacity: 0;
+  transform: translateY(20px);
+  animation-delay: 2.2s;
+  animation-fill-mode: forwards;
+}
+@keyframes readyBtnPulse {
+  0% { opacity: 0; transform: translateY(20px) scale(0.9); }
+  20% { opacity: 1; transform: translateY(0) scale(1); }
+  60% {
+    opacity: 1; transform: translateY(0) scale(1);
+    box-shadow: 0 0 0 4px var(--gold), 0 8px 0 var(--brown), 0 0 80px rgba(212, 160, 23, 0.7), 0 0 120px rgba(116, 163, 52, 0.4);
+  }
+  100% {
+    opacity: 1; transform: translateY(0) scale(1);
+    box-shadow: 0 0 0 4px var(--gold), 0 8px 0 var(--brown), 0 8px 30px rgba(212, 160, 23, 0.5);
+  }
+}
+.ready-button:hover {
+  transform: translateY(-4px);
+  background: var(--gold-bright);
+  box-shadow: 0 0 0 4px var(--gold-bright), 0 12px 0 var(--brown), 0 16px 40px rgba(212, 160, 23, 0.7);
+}
+.ready-button:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 4px var(--gold), 0 4px 0 var(--brown);
+}
+
+.ready-hint {
+  font-family: var(--font-body);
+  font-size: clamp(12px, 1.6vw, 15px);
+  color: var(--cream-dim);
+  margin-top: 30px;
+  font-style: italic;
+  opacity: 0;
+  position: relative;
+  z-index: 2;
+  animation: hintFadeIn 0.8s ease-out 3s forwards;
+}
+@keyframes hintFadeIn {
+  to { opacity: 0.7; }
+}
+
 /* ========== LOADING SCREEN ========== */
 #loading-screen {
   position: fixed; inset: 0;
@@ -43,8 +161,11 @@ img { display: block; max-width: 100%; }
   z-index: 9999;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.6s ease-out, visibility 0.6s ease-out;
 }
+#loading-screen.active { visibility: visible; opacity: 1; }
 #loading-screen.hidden { opacity: 0; visibility: hidden; }
 #loading-screen::before {
   content: ''; position: absolute; inset: 0;
@@ -118,7 +239,7 @@ img { display: block; max-width: 100%; }
   letter-spacing: 2px;
 }
 
- /* ========== AUDIO CONTROL ========== */
+/* ========== AUDIO CONTROL ========== */
 #audio-control {
   position: fixed;
   top: 20px;
@@ -137,23 +258,10 @@ img { display: block; max-width: 100%; }
   transform: translateY(-20px);
   box-shadow: 0 0 0 2px var(--green-darkest), 0 0 0 5px var(--brown);
 }
-#audio-control.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-#audio-control:hover {
-  background: var(--gold);
-  transform: translateY(-2px);
-}
-#audio-control:hover .audio-icon-bar {
-  background: var(--green-darkest);
-}
-.audio-icon {
-  display: flex;
-  gap: 3px;
-  align-items: flex-end;
-  height: 18px;
-}
+#audio-control.visible { opacity: 1; transform: translateY(0); }
+#audio-control:hover { background: var(--gold); transform: translateY(-2px); }
+#audio-control:hover .audio-icon-bar { background: var(--green-darkest); }
+.audio-icon { display: flex; gap: 3px; align-items: flex-end; height: 18px; }
 .audio-icon-bar {
   width: 4px;
   background: var(--gold);
@@ -163,17 +271,14 @@ img { display: block; max-width: 100%; }
 .audio-icon-bar:nth-child(2) { height: 100%; }
 .audio-icon-bar:nth-child(3) { height: 60%; }
 .audio-icon-bar:nth-child(4) { height: 80%; }
-
 #audio-control.playing .audio-icon-bar:nth-child(1) { animation: bar-bounce 0.8s ease-in-out infinite; }
 #audio-control.playing .audio-icon-bar:nth-child(2) { animation: bar-bounce 0.8s ease-in-out infinite 0.15s; }
 #audio-control.playing .audio-icon-bar:nth-child(3) { animation: bar-bounce 0.8s ease-in-out infinite 0.3s; }
 #audio-control.playing .audio-icon-bar:nth-child(4) { animation: bar-bounce 0.8s ease-in-out infinite 0.45s; }
-
 @keyframes bar-bounce {
   0%, 100% { height: 30%; }
   50% { height: 100%; }
 }
-
 #audio-control.muted .audio-icon-bar {
   height: 30% !important;
   animation: none !important;
@@ -189,18 +294,11 @@ img { display: block; max-width: 100%; }
   transform: rotate(-45deg);
   pointer-events: none;
 }
-
-/* Mobile: smaller audio button */
 @media (max-width: 768px) {
-  #audio-control {
-    top: 12px;
-    right: 12px;
-    width: 38px;
-    height: 38px;
-  }
+  #audio-control { top: 12px; right: 12px; width: 38px; height: 38px; }
   .audio-icon { height: 14px; }
-} 
-  
+}
+
 /* ========== TOP NAV ========== */
 #top-nav {
   position: fixed; top: 0; left: 0; right: 0;
@@ -209,7 +307,7 @@ img { display: block; max-width: 100%; }
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-bottom: 2px solid var(--gold);
-  padding: 12px 20px;
+  padding: 12px 80px 12px 20px;
   display: flex; align-items: center; justify-content: center;
   gap: 12px;
   opacity: 0; transform: translateY(-100%);
@@ -419,52 +517,98 @@ img { display: block; max-width: 100%; }
   50% { transform: rotate(45deg) translateY(8px); opacity: 1; }
 }
 
-/* ========== STORY ========== */
+/* ========== STORY (UNIFIED — story + team in zigzag blocks) ========== */
 #story {
   position: relative;
   padding: 120px 20px;
   background: linear-gradient(180deg, var(--green-deep) 0%, var(--green-darkest) 50%, var(--green-deep) 100%);
 }
-.story-container {
-  max-width: 800px; margin: 0 auto;
-  position: relative;
-  padding-left: 40px;
-}
-.story-container::before {
-  content: ''; position: absolute;
-  left: 8px; top: 0; bottom: 0; width: 4px;
-  background: repeating-linear-gradient(180deg, var(--gold) 0, var(--gold) 8px, transparent 8px, transparent 16px);
-}
 .story-section-title {
   font-family: var(--font-pixel);
-  font-size: clamp(14px, 2.4vw, 20px);
+  font-size: clamp(16px, 3vw, 24px);
   color: var(--gold);
   text-align: center;
-  margin-bottom: 80px;
-  letter-spacing: 4px;
-  margin-left: -40px;
-}
-.story-block {
-  position: relative;
   margin-bottom: 100px;
-  opacity: 0.15;
-  transform: translateY(40px) scale(0.96);
-  transition: opacity 0.8s ease, transform 0.8s ease;
+  letter-spacing: 4px;
 }
-.story-block.active { opacity: 1; transform: translateY(0) scale(1); }
-.story-block.passed { opacity: 0.3; }
-.story-block::before {
-  content: ''; position: absolute;
-  left: -40px; top: 8px;
-  width: 20px; height: 20px;
+
+.story-list {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.story-block {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(30px, 6vw, 100px);
+  align-items: center;
+  margin-bottom: clamp(80px, 12vw, 160px);
+  position: relative;
+}
+
+/* Photo side */
+.story-photo-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transform: translateX(-80px) scale(0.9);
+  transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.story-block.right .story-photo-wrap {
+  order: 2;
+  transform: translateX(80px) scale(0.9);
+}
+.story-block.visible .story-photo-wrap {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+.story-photo {
+  width: 100%;
+  max-width: clamp(220px, 32vw, 360px);
+  height: auto;
+  position: relative;
+}
+.story-photo img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 40px rgba(212, 160, 23, 0.15));
+}
+.story-photo-name {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-pixel);
+  font-size: clamp(10px, 1.6vw, 14px);
+  color: var(--gold);
+  letter-spacing: 3px;
   background: var(--green-darkest);
-  border: 4px solid var(--gold);
-  transition: all 0.5s ease;
+  padding: 8px 16px;
+  border: 2px solid var(--gold);
+  white-space: nowrap;
+  z-index: 5;
 }
-.story-block.active::before {
-  background: var(--gold);
-  box-shadow: 0 0 20px var(--gold-bright), 0 0 40px rgba(212, 160, 23, 0.4);
+
+/* Text side */
+.story-text-wrap {
+  opacity: 0;
+  transform: translateX(80px);
+  transition: opacity 0.9s ease 0.15s, transform 0.9s ease 0.15s;
 }
+.story-block.right .story-text-wrap {
+  order: 1;
+  transform: translateX(-80px);
+  text-align: right;
+}
+.story-block.visible .story-text-wrap {
+  opacity: 1;
+  transform: translateX(0);
+}
+
 .story-block-number {
   font-family: var(--font-pixel);
   font-size: 10px;
@@ -472,111 +616,20 @@ img { display: block; max-width: 100%; }
   letter-spacing: 2px;
   margin-bottom: 16px;
 }
-.story-block p {
+.story-text-wrap p {
   font-size: clamp(15px, 2vw, 19px);
   line-height: 1.8;
   color: var(--cream);
   margin-bottom: 16px;
 }
-.story-block p.emphasis { font-style: italic; color: var(--gold-bright); font-weight: 600; }
-.story-block p.small { font-size: clamp(13px, 1.7vw, 16px); color: var(--cream-dim); }
-
-/* ========== TEAM ========== */
-#team {
-  padding: 120px 20px;
-  background: var(--green-darkest);
-  position: relative;
-}
-#team::before {
-  content: ''; position: absolute; inset: 0;
-  background-image:
-    linear-gradient(rgba(116, 163, 52, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(116, 163, 52, 0.04) 1px, transparent 1px);
-  background-size: 32px 32px;
-  pointer-events: none;
-}
-.team-header { text-align: center; margin-bottom: 100px; position: relative; z-index: 2; }
-.team-title {
-  font-family: var(--font-pixel);
-  font-size: clamp(16px, 3vw, 28px);
-  color: var(--gold);
-  letter-spacing: 4px;
-  margin-bottom: 16px;
-}
-.team-subtitle {
-  font-size: clamp(14px, 1.8vw, 17px);
-  color: var(--cream-dim);
-  max-width: 600px; margin: 0 auto;
-}
-.team-list { max-width: 1100px; margin: 0 auto; position: relative; z-index: 2; }
-.team-card {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(24px, 5vw, 80px);
-  align-items: center;
-  margin-bottom: 80px;
-  opacity: 0;
-  transform: translateX(-60px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-}
-.team-card.right { transform: translateX(60px); }
-.team-card.right .team-photo-wrap { order: 2; }
-.team-card.right .team-info { order: 1; text-align: right; }
-.team-card.visible { opacity: 1; transform: translateX(0); }
-.team-photo-wrap { display: flex; justify-content: center; }
-.team-photo {
-  width: clamp(180px, 28vw, 260px);
-  height: clamp(180px, 28vw, 260px);
-  background: var(--cream);
-  border: 4px solid var(--gold);
-  position: relative;
-  box-shadow: 0 0 0 2px var(--green-darkest), 0 0 0 8px var(--brown), 0 0 0 10px var(--green-darkest), 0 12px 30px rgba(0, 0, 0, 0.4);
-  overflow: hidden;
-  transition: transform 0.4s ease;
-}
-.team-card.visible .team-photo:hover { transform: translateY(-6px) scale(1.02); }
-.team-photo img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  object-position: center top;
-  mix-blend-mode: multiply;
-  filter: contrast(1.05);
-}
-.team-photo-name {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  background: linear-gradient(0deg, var(--green-darkest) 0%, transparent 100%);
-  color: var(--cream);
-  font-family: var(--font-pixel);
-  font-size: clamp(9px, 1.4vw, 12px);
-  padding: 24px 12px 10px;
-  letter-spacing: 2px;
-  text-align: center;
-  z-index: 5;
-  mix-blend-mode: normal;
-}
-.team-info-role {
-  font-family: var(--font-pixel);
-  font-size: clamp(10px, 1.6vw, 14px);
-  color: var(--gold);
-  letter-spacing: 2px;
-  margin-bottom: 16px;
-  display: inline-block;
-  padding: 8px 14px;
-  border: 2px solid var(--gold);
-  background: rgba(212, 160, 23, 0.08);
-}
-.team-info-name {
-  font-family: var(--font-pixel);
-  font-size: clamp(18px, 3vw, 28px);
-  color: var(--cream);
-  margin-bottom: 20px;
-  letter-spacing: 3px;
-}
-.team-info-desc {
-  font-size: clamp(14px, 1.8vw, 18px);
-  color: var(--cream-dim);
-  line-height: 1.7;
+.story-text-wrap p.emphasis {
   font-style: italic;
+  color: var(--gold-bright);
+  font-weight: 700;
+}
+.story-text-wrap p.small {
+  font-size: clamp(13px, 1.7vw, 16px);
+  color: var(--cream-dim);
 }
 
 /* ========== FINALE ========== */
@@ -599,35 +652,14 @@ img { display: block; max-width: 100%; }
   background-size: 32px 32px;
   pointer-events: none;
 }
-.finale-content { position: relative; z-index: 5; max-width: 800px; width: 100%; text-align: center; }
-.finale-photo {
-  width: 100%; max-width: 600px;
-  margin: 0 auto 50px;
-  aspect-ratio: 3 / 4;
-  background: var(--cream);
-  border: 6px solid var(--gold);
+.finale-content {
   position: relative;
-  box-shadow: 0 0 0 3px var(--green-darkest), 0 0 0 10px var(--brown), 0 0 0 13px var(--green-darkest), 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 80px rgba(212, 160, 23, 0.2);
-  overflow: hidden;
-}
-.finale-photo img {
-  width: 100%; height: 100%;
-  object-fit: contain;
-  object-position: center;
-  mix-blend-mode: multiply;
-}
-.finale-photo-label {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  font-family: var(--font-pixel);
-  font-size: clamp(9px, 1.4vw, 12px);
-  color: var(--cream);
-  background: linear-gradient(0deg, var(--green-darkest) 30%, transparent 100%);
-  padding: 30px 10px 12px;
-  text-align: center;
-  letter-spacing: 2px;
   z-index: 5;
-  mix-blend-mode: normal;
+  max-width: 900px;
+  width: 100%;
+  text-align: center;
 }
+
 .finale-title {
   font-family: var(--font-pixel);
   font-size: clamp(18px, 4vw, 36px);
@@ -640,37 +672,85 @@ img { display: block; max-width: 100%; }
 .finale-subtitle {
   font-size: clamp(14px, 2vw, 18px);
   color: var(--cream-dim);
-  max-width: 600px; margin: 0 auto 50px;
+  max-width: 600px;
+  margin: 0 auto 60px;
   line-height: 1.7;
 }
+
+/* Stage: foto group as backdrop, button overlapping in front */
+.finale-stage {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  padding-top: 40px;
+}
+
+.finale-photo {
+  width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+.finale-photo img {
+  width: 100%;
+  height: auto;
+  max-height: 80vh;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 20px 60px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 60px rgba(212, 160, 23, 0.2));
+  opacity: 0;
+  transform: translateY(40px) scale(0.95);
+  transition: opacity 1s ease, transform 1s ease;
+}
+.finale-photo.visible img {
+  opacity: 0.95;
+  transform: translateY(0) scale(1);
+}
+
+/* Play button overlapping the photo */
+.play-button-wrap {
+  position: absolute;
+  left: 50%;
+  bottom: 8%;
+  transform: translateX(-50%);
+  z-index: 10;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
 .play-button {
+  pointer-events: auto;
   display: inline-block;
   font-family: var(--font-pixel);
-  font-size: clamp(14px, 2.4vw, 22px);
+  font-size: clamp(12px, 2.4vw, 22px);
   color: var(--green-darkest);
   background: var(--gold);
-  padding: clamp(20px, 3vw, 28px) clamp(40px, 6vw, 70px);
+  padding: clamp(18px, 2.8vw, 26px) clamp(36px, 5.5vw, 64px);
   border: 4px solid var(--green-darkest);
   text-decoration: none;
   letter-spacing: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 0 0 4px var(--gold), 0 8px 0 var(--brown), 0 8px 30px rgba(212, 160, 23, 0.5);
+  box-shadow: 0 0 0 4px var(--gold), 0 8px 0 var(--brown), 0 8px 30px rgba(212, 160, 23, 0.6), 0 0 60px rgba(212, 160, 23, 0.4);
   animation: playPulse 2s ease-in-out infinite;
+  white-space: nowrap;
 }
 @keyframes playPulse {
-  0%, 100% { box-shadow: 0 0 0 4px var(--gold), 0 8px 0 var(--brown), 0 8px 30px rgba(212, 160, 23, 0.5), 0 0 40px rgba(212, 160, 23, 0.3); }
-  50% { box-shadow: 0 0 0 4px var(--gold), 0 8px 0 var(--brown), 0 8px 30px rgba(212, 160, 23, 0.5), 0 0 80px rgba(212, 160, 23, 0.7), 0 0 120px rgba(116, 163, 52, 0.4); }
+  0%, 100% { box-shadow: 0 0 0 4px var(--gold), 0 8px 0 var(--brown), 0 8px 30px rgba(212, 160, 23, 0.6), 0 0 60px rgba(212, 160, 23, 0.4); }
+  50% { box-shadow: 0 0 0 4px var(--gold), 0 8px 0 var(--brown), 0 8px 30px rgba(212, 160, 23, 0.6), 0 0 100px rgba(212, 160, 23, 0.9), 0 0 140px rgba(116, 163, 52, 0.5); }
 }
 .play-button:hover {
   transform: translateY(-4px);
-  box-shadow: 0 0 0 4px var(--gold-bright), 0 12px 0 var(--brown), 0 16px 40px rgba(212, 160, 23, 0.7);
   background: var(--gold-bright);
+  box-shadow: 0 0 0 4px var(--gold-bright), 0 12px 0 var(--brown), 0 16px 40px rgba(212, 160, 23, 0.8), 0 0 80px rgba(212, 160, 23, 0.6);
 }
 .play-button:active {
   transform: translateY(4px);
   box-shadow: 0 0 0 4px var(--gold), 0 4px 0 var(--brown);
 }
+
 .finale-footer {
   margin-top: 60px;
   font-family: var(--font-pixel);
@@ -698,30 +778,35 @@ img { display: block; max-width: 100%; }
 
 /* ========== MOBILE ========== */
 @media (max-width: 768px) {
-  #top-nav { padding: 10px 12px; gap: 8px; }
+  #top-nav { padding: 10px 60px 10px 12px; gap: 8px; }
   .nav-tab { padding: 8px 14px; }
-  .story-container { padding-left: 30px; }
-  .story-container::before { left: 4px; width: 3px; }
-  .story-block::before { left: -32px; width: 16px; height: 16px; border-width: 3px; }
-  .story-section-title { margin-left: -30px; }
-  .team-card,
-  .team-card.right {
+
+  .story-block,
+  .story-block.right {
     grid-template-columns: 1fr;
     text-align: center;
-    transform: translateY(40px);
+    gap: 40px;
   }
-  .team-card.right .team-info { order: unset; text-align: center; }
-  .team-card.right .team-photo-wrap { order: unset; }
-  .team-card.visible { transform: translateY(0); }
-  .team-info-role,
-  .team-info-name,
-  .team-info-desc { text-align: center !important; }
+  .story-block.right .story-photo-wrap { order: -1; transform: translateY(40px) scale(0.9); }
+  .story-block.right .story-text-wrap { order: 0; transform: translateY(40px); text-align: center; }
+  .story-photo-wrap { transform: translateY(40px) scale(0.9); }
+  .story-text-wrap { transform: translateY(40px); text-align: center !important; }
+  .story-block.visible .story-photo-wrap,
+  .story-block.visible .story-text-wrap { transform: translateY(0) scale(1); }
+
+  .play-button-wrap { bottom: 4%; }
+  .play-button {
+    font-size: 12px;
+    padding: 16px 28px;
+    letter-spacing: 2px;
+  }
 }
 @media (max-width: 480px) {
   .hero-title { letter-spacing: 2px; }
   .hero-subtitle { font-size: 14px; }
-  .play-button { letter-spacing: 2px; padding: 18px 28px; }
   .finale-title { letter-spacing: 2px; }
+  .ready-question { letter-spacing: 2px; }
+  .ready-button { letter-spacing: 2px; padding: 16px 28px; font-size: 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -737,16 +822,15 @@ img { display: block; max-width: 100%; }
 <!-- BACKGROUND AUDIO -->
 <audio id="bgm" src="assets/audio/sohun.mp3" loop preload="auto"></audio>
 
-<!-- AUDIO CONTROL BUTTON -->
-<button id="audio-control" aria-label="Toggle music" title="Toggle music">
-  <div class="audio-icon">
-    <div class="audio-icon-bar"></div>
-    <div class="audio-icon-bar"></div>
-    <div class="audio-icon-bar"></div>
-    <div class="audio-icon-bar"></div>
-  </div>
-</button>
-  
+<!-- READY GATE (PRE-LOADING) -->
+<div id="ready-gate">
+  <h1 class="ready-question">
+    <span class="ready-typing">ARE YOU READY?</span>
+  </h1>
+  <button id="ready-button" class="ready-button">READY DONG</button>
+  <p class="ready-hint">klik buat mulai petualangan</p>
+</div>
+
 <!-- LOADING SCREEN -->
 <div id="loading-screen">
   <div class="logo-assembly-stage">
@@ -761,6 +845,16 @@ img { display: block; max-width: 100%; }
   </div>
   <div class="loading-percent" id="loading-percent">LOADING... 0%</div>
 </div>
+
+<!-- AUDIO CONTROL BUTTON -->
+<button id="audio-control" aria-label="Toggle music" title="Toggle music">
+  <div class="audio-icon">
+    <div class="audio-icon-bar"></div>
+    <div class="audio-icon-bar"></div>
+    <div class="audio-icon-bar"></div>
+    <div class="audio-icon-bar"></div>
+  </div>
+</button>
 
 <!-- TOP NAV -->
 <nav id="top-nav">
@@ -798,116 +892,166 @@ img { display: block; max-width: 100%; }
   </div>
 </section>
 
-<!-- STORY -->
+<!-- STORY (with member photos) -->
 <section id="story">
-  <div class="story-container">
-    <h2 class="story-section-title">CERITA KAMI</h2>
+  <h2 class="story-section-title">CERITA KAMI</h2>
 
+  <div class="story-list">
+
+    <!-- 1. Asad - left -->
     <div class="story-block">
-      <div class="story-block-number">[ BLOCK 01 ]</div>
-      <p>Jadi gini ceritanya. Sembilan anak statistika, satu ruangan, laptop nyala, kopi udah dingin entah dari kapan. Dan ada satu pertanyaan yang nggak bisa diem di kepala mereka...</p>
+      <div class="story-photo-wrap">
+        <div class="story-photo">
+          <img src="assets/images/asad.png" alt="Asad" />
+          <div class="story-photo-name">ASAD</div>
+        </div>
+      </div>
+      <div class="story-text-wrap">
+        <div class="story-block-number">[ BLOCK 01 ]</div>
+        <p>Jadi gini ceritanya. Sembilan anak statistika, satu ruangan, laptop nyala, kopi udah dingin entah dari kapan. Dan ada satu pertanyaan yang nggak bisa diem di kepala mereka...</p>
+      </div>
     </div>
 
+    <!-- 2. Rafly - right -->
+    <div class="story-block right">
+      <div class="story-photo-wrap">
+        <div class="story-photo">
+          <img src="assets/images/rafly.png" alt="Rafly" />
+          <div class="story-photo-name">RAFLY</div>
+        </div>
+      </div>
+      <div class="story-text-wrap">
+        <div class="story-block-number">[ BLOCK 02 ]</div>
+        <p class="emphasis">"Mahasiswa di sekitar kita, mereka literally minum air putih cukup nggak sih setiap hari?"</p>
+        <p class="small">Pertanyaan yang katanya simpel. Tapi jawabannya... ternyata nggak sesimpel itu.</p>
+      </div>
+    </div>
+
+    <!-- 3. Dinda - left -->
     <div class="story-block">
-      <div class="story-block-number">[ BLOCK 02 ]</div>
-      <p class="emphasis">"Mahasiswa di sekitar kita, mereka literally minum air putih cukup nggak sih setiap hari? Kalau nggak — apa itu beneran ngaruh ke cara mereka belajar, fokus, dan ngejalanin hari?"</p>
-      <p class="small">Pertanyaannya simpel banget. Tapi jawabannya... ternyata nggak sesimpel itu.</p>
+      <div class="story-photo-wrap">
+        <div class="story-photo">
+          <img src="assets/images/dinda.png" alt="Dinda" />
+          <div class="story-photo-name">DINDA</div>
+        </div>
+      </div>
+      <div class="story-text-wrap">
+        <div class="story-block-number">[ BLOCK 03 ]</div>
+        <p>Kalau nggak — apa itu beneran ngaruh ke cara mereka belajar, fokus, dan ngejalanin hari?</p>
+        <p class="small">Pertanyaan kayak gini biasanya cuma jadi obrolan random pas nongkrong. Tapi mereka mutusin buat ngubah obrolan itu jadi data beneran.</p>
+      </div>
     </div>
 
+    <!-- 4. Jun - right -->
+    <div class="story-block right">
+      <div class="story-photo-wrap">
+        <div class="story-photo">
+          <img src="assets/images/jun.png" alt="Jun" />
+          <div class="story-photo-name">JUN</div>
+        </div>
+      </div>
+      <div class="story-text-wrap">
+        <div class="story-block-number">[ BLOCK 04 ]</div>
+        <p>Mereka sebenernya bisa aja bikin kuesioner biasa. Lempar form, isi, selesai. Tapi mereka milih jalan yang beda.</p>
+        <p class="small">Mereka mutusin buat bikin sesuatu yang belum pernah ada di kelompok mereka sebelumnya — sebuah game.</p>
+      </div>
+    </div>
+
+    <!-- 5. Nesya - left -->
     <div class="story-block">
-      <div class="story-block-number">[ BLOCK 03 ]</div>
-      <p>Mereka sebenernya bisa aja bikin kuesioner biasa. Lempar form, isi, selesai. Tapi mereka milih jalan yang beda. Mereka mutusin buat bikin sesuatu yang belum pernah ada di kelompok mereka sebelumnya — sebuah game.</p>
-      <p class="small">Bukan game biasa. Game di mana kamu jadi karakternya, jelajahin dunia pixel art, ngumpulin botol air, dan jawab pertanyaan penelitian sambil seru-seruan di tengah petualangan.</p>
+      <div class="story-photo-wrap">
+        <div class="story-photo">
+          <img src="assets/images/nesya.png" alt="Nesya" />
+          <div class="story-photo-name">NESYA</div>
+        </div>
+      </div>
+      <div class="story-text-wrap">
+        <div class="story-block-number">[ BLOCK 05 ]</div>
+        <p class="emphasis">"Bukan game biasa. Game di mana kamu jadi karakternya."</p>
+        <p class="small">Jelajahin dunia pixel art, ngumpulin botol air, dan jawab pertanyaan penelitian sambil seru-seruan di tengah petualangan.</p>
+      </div>
     </div>
 
+    <!-- 6. Ruth - right -->
+    <div class="story-block right">
+      <div class="story-photo-wrap">
+        <div class="story-photo">
+          <img src="assets/images/ruth.png" alt="Ruth" />
+          <div class="story-photo-name">RUTH</div>
+        </div>
+      </div>
+      <div class="story-text-wrap">
+        <div class="story-block-number">[ BLOCK 06 ]</div>
+        <p>Sembilan orang. Satu visi yang sama.</p>
+        <p class="small">Berhari-hari ngutak-ngatik bug, desain ulang, nulis soal statistik, dan mastiin tiap detail game ini bisa jalan mulus baik di laptop maupun handphone.</p>
+      </div>
+    </div>
+
+    <!-- 7. Dandy - left -->
     <div class="story-block">
-      <div class="story-block-number">[ BLOCK 04 ]</div>
-      <p>Sembilan orang. Satu visi yang sama. Berhari-hari ngutak-ngatik bug, desain ulang, nulis soal statistik, dan mastiin tiap detail game ini bisa jalan mulus baik di laptop maupun handphone.</p>
-      <p class="small">Ada yang begadang sampe pagi cuma buat benerin satu bug. Ada yang bolak-balik ngitung validitas tiap pertanyaan. Ada yang fokus mastiin tampilannya cukup vibes biar yang main nggak bosen di tengah jalan.</p>
+      <div class="story-photo-wrap">
+        <div class="story-photo">
+          <img src="assets/images/dandy.png" alt="Dandy" />
+          <div class="story-photo-name">DANDY</div>
+        </div>
+      </div>
+      <div class="story-text-wrap">
+        <div class="story-block-number">[ BLOCK 07 ]</div>
+        <p>Ada yang begadang sampe pagi cuma buat benerin satu bug. Ada yang bolak-balik ngitung validitas tiap pertanyaan.</p>
+        <p class="small">Ada juga yang fokus mastiin tampilannya cukup vibes biar yang main nggak bosen di tengah jalan.</p>
+      </div>
     </div>
 
+    <!-- 8. Awa - right -->
+    <div class="story-block right">
+      <div class="story-photo-wrap">
+        <div class="story-photo">
+          <img src="assets/images/awa.png" alt="Awa" />
+          <div class="story-photo-name">AWA</div>
+        </div>
+      </div>
+      <div class="story-text-wrap">
+        <div class="story-block-number">[ BLOCK 08 ]</div>
+        <p class="emphasis">"Dan sekarang, gamenya udah jadi."</p>
+        <p class="small">Tapi perjalanan kami belum kelar. Justru baru mulai.</p>
+      </div>
+    </div>
+
+    <!-- 9. Cut - left -->
     <div class="story-block">
-      <div class="story-block-number">[ BLOCK 05 ]</div>
-      <p class="emphasis">"Dan sekarang, gamenya udah jadi. Tapi perjalanan kami belum kelar."</p>
-      <p class="small">Mereka butuh kalian. Data dari game ini bakal jadi bagian dari penelitian beneran — soal kebiasaan minum air mahasiswa dan dampaknya ke produktivitas akademik. Tiap botol yang kalian kumpulin, tiap jawaban yang kalian kasih, itu kontribusi nyata buat ilmu pengetahuan.</p>
-    </div>
-  </div>
-</section>
-
-<!-- TEAM -->
-<section id="team">
-  <div class="team-header">
-    <h2 class="team-title">TIM KAMI</h2>
-    <p class="team-subtitle">Sembilan kepala, sembilan peran. Setiap orang punya bagiannya masing-masing buat bikin game ini hidup.</p>
-  </div>
-
-  <div class="team-list">
-    <div class="team-card">
-      <div class="team-photo-wrap"><div class="team-photo"><img src="assets/images/asad.png" alt="Asad" /><div class="team-photo-name">ASAD</div></div></div>
-      <div class="team-info"><div class="team-info-role">PENGGAGAS IDE</div><h3 class="team-info-name">Asad</h3><p class="team-info-desc">"Yang pertama nanya: emang mahasiswa minum air cukup nggak sih?"</p></div>
+      <div class="story-photo-wrap">
+        <div class="story-photo">
+          <img src="assets/images/cut.png" alt="Cut" />
+          <div class="story-photo-name">CUT</div>
+        </div>
+      </div>
+      <div class="story-text-wrap">
+        <div class="story-block-number">[ BLOCK 09 ]</div>
+        <p>Kami butuh kalian. Data dari game ini bakal jadi bagian dari penelitian beneran — soal kebiasaan minum air mahasiswa dan dampaknya ke produktivitas akademik.</p>
+        <p class="small">Tiap botol yang kalian kumpulin, tiap jawaban yang kalian kasih, itu kontribusi nyata buat ilmu pengetahuan.</p>
+      </div>
     </div>
 
-    <div class="team-card right">
-      <div class="team-info"><div class="team-info-role">GAME DEVELOPER</div><h3 class="team-info-name">Rafly</h3><p class="team-info-desc">"Kalau ada yang bilang impossible, tanya Rafly dulu."</p></div>
-      <div class="team-photo-wrap"><div class="team-photo"><img src="assets/images/rafly.png" alt="Rafly" /><div class="team-photo-name">RAFLY</div></div></div>
-    </div>
-
-    <div class="team-card">
-      <div class="team-photo-wrap"><div class="team-photo"><img src="assets/images/dinda.png" alt="Dinda" /><div class="team-photo-name">DINDA</div></div></div>
-      <div class="team-info"><div class="team-info-role">PENELITI STATISTIK</div><h3 class="team-info-name">Dinda</h3><p class="team-info-desc">"Setiap soal punya dasar teori. Dinda yang mastiin itu."</p></div>
-    </div>
-
-    <div class="team-card right">
-      <div class="team-info"><div class="team-info-role">QUALITY TESTER</div><h3 class="team-info-name">Jun</h3><p class="team-info-desc">"Error jam 2 pagi? Jun masih online."</p></div>
-      <div class="team-photo-wrap"><div class="team-photo"><img src="assets/images/jun.png" alt="Jun" /><div class="team-photo-name">JUN</div></div></div>
-    </div>
-
-    <div class="team-card">
-      <div class="team-photo-wrap"><div class="team-photo"><img src="assets/images/nesya.png" alt="Nesya" /><div class="team-photo-name">NESYA</div></div></div>
-      <div class="team-info"><div class="team-info-role">VISUAL DESIGNER</div><h3 class="team-info-name">Nesya</h3><p class="team-info-desc">"Yang bikin semuanya keliatan indah."</p></div>
-    </div>
-
-    <div class="team-card right">
-      <div class="team-info"><div class="team-info-role">DATA ANALYST</div><h3 class="team-info-name">Ruth</h3><p class="team-info-desc">"Angka-angka dari game ini bakal diolah jadi insight nyata."</p></div>
-      <div class="team-photo-wrap"><div class="team-photo"><img src="assets/images/ruth.png" alt="Ruth" /><div class="team-photo-name">RUTH</div></div></div>
-    </div>
-
-    <div class="team-card">
-      <div class="team-photo-wrap"><div class="team-photo"><img src="assets/images/dandy.png" alt="Dandy" /><div class="team-photo-name">DANDY</div></div></div>
-      <div class="team-info"><div class="team-info-role">GAME ARCHITECT</div><h3 class="team-info-name">Dandy</h3><p class="team-info-desc">"Yang milih engine-nya, setup semuanya, begadang paling lama."</p></div>
-    </div>
-
-    <div class="team-card right">
-      <div class="team-info"><div class="team-info-role">PROJECT COORDINATOR</div><h3 class="team-info-name">Awa</h3><p class="team-info-desc">"Kalau tim chaos, Awa yang nenangin semuanya."</p></div>
-      <div class="team-photo-wrap"><div class="team-photo"><img src="assets/images/awa.png" alt="Awa" /><div class="team-photo-name">AWA</div></div></div>
-    </div>
-
-    <div class="team-card">
-      <div class="team-photo-wrap"><div class="team-photo"><img src="assets/images/cut.png" alt="Cut" /><div class="team-photo-name">CUT</div></div></div>
-      <div class="team-info"><div class="team-info-role">QUALITY CONTROL</div><h3 class="team-info-name">Cut</h3><p class="team-info-desc">"Sebelum game keluar, Cut yang pertama bilang 'ini belum beres'."</p></div>
-    </div>
   </div>
 </section>
 
 <!-- FINALE -->
 <section id="finale">
   <div class="finale-content">
-    <div class="finale-photo">
-      <img src="assets/images/paling_bawah.png" alt="Foto Bersama Kelompok 7" />
-      <div class="finale-photo-label">FOTO BERSAMA KELOMPOK 7</div>
-    </div>
+    <h2 class="finale-title">Data kalian berarti.<br/>Bantu penelitian kami!</h2>
+    <p class="finale-subtitle">Main gamenya sekarang dan jadilah bagian dari penelitian statistika kami tentang air minum dan produktivitas mahasiswa.</p>
 
     <div class="pixel-divider">
       <span></span><span></span><span></span><span></span><span></span>
     </div>
 
-    <h2 class="finale-title">Data kalian berarti.<br/>Bantu penelitian kami!</h2>
-    <p class="finale-subtitle">Main gamenya sekarang dan jadilah bagian dari penelitian statistika kami tentang air minum dan produktivitas mahasiswa.</p>
-
-    <a href="https://dandynugraha.itch.io/ninja-statis-7" target="_blank" rel="noopener noreferrer" class="play-button">MAIN SEKARANG</a>
-
-    <div class="pixel-divider" style="margin-top: 60px;">
-      <span></span><span></span><span></span><span></span><span></span>
+    <div class="finale-stage">
+      <div class="finale-photo" id="finale-photo">
+        <img src="assets/images/paling_bawah.png" alt="Foto Bersama Kelompok 7" />
+      </div>
+      <div class="play-button-wrap">
+        <a href="https://dandynugraha.itch.io/ninja-statis-7" target="_blank" rel="noopener noreferrer" class="play-button">MAIN SEKARANG</a>
+      </div>
     </div>
 
     <div class="finale-footer">
@@ -918,8 +1062,85 @@ img { display: block; max-width: 100%; }
 </section>
 
 <script>
-/* LOADING SCREEN + AUDIO INIT */
-(function() {
+/* ========== AUDIO MANAGER ========== */
+const audioManager = (function() {
+  const bgm = document.getElementById('bgm');
+  const audioControl = document.getElementById('audio-control');
+  let isPlaying = false;
+  let fadeInterval = null;
+
+  bgm.volume = 1.0;
+
+  function play() {
+    // Clear any ongoing fade
+    if (fadeInterval) {
+      clearInterval(fadeInterval);
+      fadeInterval = null;
+    }
+    bgm.volume = 1.0;
+    const p = bgm.play();
+    if (p !== undefined) {
+      p.then(() => {
+        isPlaying = true;
+        audioControl.classList.add('playing');
+        audioControl.classList.remove('muted');
+      }).catch(() => {
+        isPlaying = false;
+        audioControl.classList.add('muted');
+      });
+    }
+  }
+
+  function pause() {
+    bgm.pause();
+    isPlaying = false;
+    audioControl.classList.remove('playing');
+    audioControl.classList.add('muted');
+  }
+
+  function toggle() {
+    if (isPlaying) pause();
+    else play();
+  }
+
+  // Smooth fade out then pause
+  function fadeOut(durationMs = 2000) {
+    if (!isPlaying) return;
+    if (fadeInterval) clearInterval(fadeInterval);
+
+    const startVolume = bgm.volume;
+    const steps = 40;
+    const stepTime = durationMs / steps;
+    const volumeStep = startVolume / steps;
+    let currentStep = 0;
+
+    fadeInterval = setInterval(() => {
+      currentStep++;
+      const newVolume = Math.max(0, startVolume - (volumeStep * currentStep));
+      bgm.volume = newVolume;
+
+      if (currentStep >= steps || newVolume <= 0) {
+        clearInterval(fadeInterval);
+        fadeInterval = null;
+        bgm.pause();
+        bgm.volume = 1.0; // reset for next play
+        isPlaying = false;
+        audioControl.classList.remove('playing');
+        audioControl.classList.add('muted');
+      }
+    }, stepTime);
+  }
+
+  audioControl.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggle();
+  });
+
+  return { play, pause, toggle, fadeOut };
+})();
+  
+/* ========== LOADING SEQUENCE ========== */
+function startLoadingSequence() {
   const TOTAL_DURATION = 8000;
   const ASSEMBLY_DURATION = 6000;
   const pixelsContainer = document.getElementById('pixels-container');
@@ -930,66 +1151,7 @@ img { display: block; max-width: 100%; }
   const loadingScreen = document.getElementById('loading-screen');
   const topNav = document.getElementById('top-nav');
   const audioControl = document.getElementById('audio-control');
-  const bgm = document.getElementById('bgm');
 
-  // === AUDIO SETUP ===
-  bgm.volume = 1.0;  // 0.0 dB = volume max
-  let isPlaying = false;
-  let userInteracted = false;
-
-  // Try to play audio (will likely fail until user interacts)
-  const tryPlayAudio = () => {
-    const playPromise = bgm.play();
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        isPlaying = true;
-        audioControl.classList.add('playing');
-        audioControl.classList.remove('muted');
-      }).catch(() => {
-        // Autoplay blocked — wait for user interaction
-        isPlaying = false;
-        audioControl.classList.add('muted');
-      });
-    }
-  };
-
-  // First user interaction triggers playback
-  const onFirstInteraction = () => {
-    if (userInteracted) return;
-    userInteracted = true;
-    tryPlayAudio();
-    document.removeEventListener('click', onFirstInteraction);
-    document.removeEventListener('touchstart', onFirstInteraction);
-    document.removeEventListener('scroll', onFirstInteraction);
-    document.removeEventListener('keydown', onFirstInteraction);
-  };
-
-  document.addEventListener('click', onFirstInteraction);
-  document.addEventListener('touchstart', onFirstInteraction, { passive: true });
-  document.addEventListener('scroll', onFirstInteraction, { passive: true });
-  document.addEventListener('keydown', onFirstInteraction);
-
-  // Audio control toggle
-  audioControl.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (isPlaying) {
-      bgm.pause();
-      isPlaying = false;
-      audioControl.classList.remove('playing');
-      audioControl.classList.add('muted');
-    } else {
-      bgm.play().then(() => {
-        isPlaying = true;
-        audioControl.classList.add('playing');
-        audioControl.classList.remove('muted');
-      }).catch(() => {});
-    }
-  });
-
-  // Try to play immediately (some browsers may allow it)
-  tryPlayAudio();
-
-  // === LOADING ANIMATION (same as before) ===
   const PIXEL_COUNT = 60;
   for (let i = 0; i < PIXEL_COUNT; i++) {
     const pixel = document.createElement('div');
@@ -1047,11 +1209,9 @@ img { display: block; max-width: 100%; }
       audioControl.classList.add('visible');
     }, 400);
   }, TOTAL_DURATION);
+}
 
-  document.body.style.overflow = 'hidden';
-})();
-
-/* TOP NAV */
+/* ========== TOP NAV ========== */
 (function() {
   const tabs = document.querySelectorAll('.nav-tab');
   const modal = document.getElementById('laporan-modal');
@@ -1074,7 +1234,7 @@ img { display: block; max-width: 100%; }
   });
 })();
 
-/* FLOATING PIXELS */
+/* ========== FLOATING PIXELS HERO ========== */
 (function() {
   const container = document.getElementById('floating-pixels-container');
   if (!container) return;
@@ -1093,7 +1253,7 @@ img { display: block; max-width: 100%; }
   }
 })();
 
-/* PARALLAX */
+/* ========== PARALLAX HERO ========== */
 (function() {
   const layers = document.querySelectorAll('.parallax-layer');
   let ticking = false;
@@ -1113,39 +1273,32 @@ img { display: block; max-width: 100%; }
   }, { passive: true });
 })();
 
-/* STORY BLOCKS */
+/* ========== STORY BLOCKS — POP-UP FROM SIDES ========== */
 (function() {
   const blocks = document.querySelectorAll('.story-block');
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        entry.target.classList.add('active');
-      } else {
-        const rect = entry.target.getBoundingClientRect();
-        if (rect.top < 0) {
-          entry.target.classList.remove('active');
-          entry.target.classList.add('passed');
-        } else {
-          entry.target.classList.remove('active', 'passed');
-        }
+        entry.target.classList.add('visible');
       }
     });
-  }, { threshold: 0.5, rootMargin: '-15% 0px -25% 0px' });
+  }, { threshold: 0.2, rootMargin: '0px 0px -10% 0px' });
   blocks.forEach(block => observer.observe(block));
 })();
 
-/* TEAM CARDS */
+/* ========== FINALE PHOTO REVEAL ========== */
 (function() {
-  const cards = document.querySelectorAll('.team-card');
+  const photo = document.getElementById('finale-photo');
+  if (!photo) return;
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      if (entry.isIntersecting) entry.target.classList.add('visible');
+      if (entry.isIntersecting) photo.classList.add('visible');
     });
-  }, { threshold: 0.2, rootMargin: '0px 0px -10% 0px' });
-  cards.forEach(card => observer.observe(card));
+  }, { threshold: 0.3 });
+  observer.observe(photo);
 })();
 
-/* HERO SCALE/FADE */
+/* ========== HERO SCALE/FADE ON SCROLL ========== */
 (function() {
   const heroContent = document.querySelector('.hero-content');
   const hero = document.getElementById('hero');
@@ -1168,6 +1321,19 @@ img { display: block; max-width: 100%; }
     }
   }, { passive: true });
 })();
+
+/* ========== PLAY BUTTON — FADE OUT MUSIC ON CLICK ========== */
+(function() {
+  const playBtn = document.querySelector('.play-button');
+  if (!playBtn) return;
+
+  playBtn.addEventListener('click', () => {
+    // User clicks "MAIN SEKARANG" -> fade out music smoothly
+    // Link still opens in new tab (target="_blank") so we don't preventDefault
+    audioManager.fadeOut(1500); // 1.5 second fade
+  });
+})();
+  
 </script>
 
 </body>
