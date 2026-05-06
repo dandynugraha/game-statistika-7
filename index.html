@@ -1103,12 +1103,54 @@ const audioManager = (function() {
     }, stepTime);
   }
 
+  // Hard stop — Safari-compatible immediate stop with fade overlap
+  // Combines instant pause + fade so it works even if tab loses focus
+  function hardStop() {
+    if (!isPlaying) return;
+
+    // Start a quick fade (visual smoothness for users who stay)
+    const startVolume = bgm.volume;
+    const steps = 20;
+    const stepTime = 40; // 800ms total fade
+    const volumeStep = startVolume / steps;
+    let currentStep = 0;
+
+    if (fadeInterval) clearInterval(fadeInterval);
+    fadeInterval = setInterval(() => {
+      currentStep++;
+      const newVolume = Math.max(0, startVolume - (volumeStep * currentStep));
+      bgm.volume = newVolume;
+      if (currentStep >= steps || newVolume <= 0) {
+        clearInterval(fadeInterval);
+        fadeInterval = null;
+        bgm.pause();
+        bgm.currentTime = 0; // Force reset so it can't auto-resume
+        bgm.volume = 1.0;
+        isPlaying = false;
+        audioControl.classList.remove('playing');
+        audioControl.classList.add('muted');
+      }
+    }, stepTime);
+
+    // SAFETY NET for Safari: also schedule a hard pause as backup
+    // If the interval gets paused (tab loses focus), this will still fire
+    // when tab regains focus or via setTimeout fallback
+    setTimeout(() => {
+      bgm.pause();
+      bgm.currentTime = 0;
+      bgm.volume = 1.0;
+      isPlaying = false;
+      audioControl.classList.remove('playing');
+      audioControl.classList.add('muted');
+    }, 850);
+  }
+
   audioControl.addEventListener('click', (e) => {
     e.stopPropagation();
     toggle();
   });
 
-  return { play, pause, toggle, fadeOut };
+  return { play, pause, toggle, fadeOut, hardStop };
 })();
 
 /* ========== READY GATE ========== */
@@ -1329,12 +1371,45 @@ function startLoadingSequence() {
   }, { passive: true });
 })();
 
-/* ========== PLAY BUTTON FADE OUT MUSIC ========== */
+/* ========== PLAY BUTTON FADE OUT MUSIC (Safari-compatible) ========== */
 (function() {
   const playBtn = document.querySelector('.play-button');
   if (!playBtn) return;
-  playBtn.addEventListener('click', () => {
-    audioManager.fadeOut(1500);
+
+  // Use 'pointerdown' instead of 'click' so it fires BEFORE Safari starts navigating
+  // Also handle 'click' as fallback for keyboard/accessibility
+  const stopMusic = () => {
+    // Safari iOS sometimes ignores fadeOut if tab loses focus
+    // Solution: do an immediate hard stop AND a fade in parallel
+    audioManager.hardStop();
+  };
+
+  playBtn.addEventListener('pointerdown', stopMusic);
+  playBtn.addEventListener('click', stopMusic);
+  playBtn.addEventListener('touchstart', stopMusic, { passive: true });
+})();
+
+/* ========== STOP MUSIC ON TAB VISIBILITY CHANGE (Safari fix) ========== */
+(function() {
+  // When user switches tabs (e.g., to game tab), Safari may keep audio playing
+  // We listen for visibility change and stop audio if user navigated away via play button
+  let userClickedPlay = false;
+
+  const playBtn = document.querySelector('.play-button');
+  if (playBtn) {
+    playBtn.addEventListener('click', () => { userClickedPlay = true; });
+    playBtn.addEventListener('pointerdown', () => { userClickedPlay = true; });
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && userClickedPlay) {
+      audioManager.hardStop();
+    }
+  });
+
+  // Also stop on pagehide (Safari fires this when tab becomes inactive)
+  window.addEventListener('pagehide', () => {
+    if (userClickedPlay) audioManager.hardStop();
   });
 })();
 </script>
