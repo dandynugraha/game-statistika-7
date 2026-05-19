@@ -631,6 +631,81 @@ img { display: block; max-width: 100%; }
   color: var(--cream-dim);
 }
 
+/* ========== DOSEN PEMBIMBING ========== */
+.dosen-pembimbing-section {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+  margin-bottom: clamp(100px, 14vw, 180px);
+}
+.dosen-pembimbing-title {
+  font-family: var(--font-pixel);
+  font-size: clamp(12px, 2.2vw, 18px);
+  color: var(--gold);
+  text-align: center;
+  margin-bottom: clamp(50px, 8vw, 80px);
+  letter-spacing: 3px;
+}
+.dosen-pembimbing-grid {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: clamp(40px, 8vw, 120px);
+  flex-wrap: wrap;
+}
+.dosen-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(40px) scale(0.9);
+  transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.dosen-card.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.dosen-card:nth-child(2) {
+  transition-delay: 0.2s;
+}
+.dosen-photo {
+  width: clamp(180px, 26vw, 300px);
+  height: auto;
+  position: relative;
+  margin-bottom: 24px;
+}
+.dosen-photo img {
+  width: 100%; height: auto;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 40px rgba(212, 160, 23, 0.15));
+}
+.dosen-name {
+  font-family: var(--font-pixel);
+  font-size: clamp(8px, 1.2vw, 11px);
+  color: var(--gold);
+  letter-spacing: 2px;
+  background: var(--green-darkest);
+  padding: 10px 18px;
+  border: 2px solid var(--gold);
+  line-height: 1.8;
+  max-width: clamp(200px, 30vw, 340px);
+}
+
+@media (max-width: 768px) {
+  .dosen-pembimbing-grid {
+    gap: 60px;
+  }
+  .dosen-photo {
+    width: clamp(160px, 50vw, 240px);
+  }
+  .dosen-name {
+    max-width: 280px;
+  }
+}
+
 /* ========== FINALE ========== */
 #finale {
   min-height: 100vh; position: relative;
@@ -876,6 +951,25 @@ img { display: block; max-width: 100%; }
 
   <h2 class="story-section-title">CERITA KAMI</h2>
 
+  <!-- DOSEN PEMBIMBING -->
+  <div class="dosen-pembimbing-section">
+    <h3 class="dosen-pembimbing-title">DOSEN PEMBIMBING</h3>
+    <div class="dosen-pembimbing-grid">
+      <div class="dosen-card" id="dosen-card-1">
+        <div class="dosen-photo">
+          <img src="assets/images/Dr. Yenni Angraini S.Si., M.Si..png" alt="Dr. Yenni Angraini S.Si., M.Si." />
+        </div>
+        <div class="dosen-name">Dr. Yenni Angraini<br/>S.Si., M.Si.</div>
+      </div>
+      <div class="dosen-card" id="dosen-card-2">
+        <div class="dosen-photo">
+          <img src="assets/images/Sachnaz Desta Oktarina S.Stat., M.AGR.Sc., Ph.D.png" alt="Sachnaz Desta Oktarina S.Stat., M.AGR.Sc., Ph.D" />
+        </div>
+        <div class="dosen-name">Sachnaz Desta Oktarina<br/>S.Stat., M.AGR.Sc., Ph.D</div>
+      </div>
+    </div>
+  </div>
+
   <div class="story-list">
 
     <!-- 1. Jun - foto kanan, teks kiri -->
@@ -1103,15 +1197,12 @@ const audioManager = (function() {
     }, stepTime);
   }
 
-  // Hard stop — Safari-compatible immediate stop with fade overlap
-  // Combines instant pause + fade so it works even if tab loses focus
   function hardStop() {
     if (!isPlaying) return;
 
-    // Start a quick fade (visual smoothness for users who stay)
     const startVolume = bgm.volume;
     const steps = 20;
-    const stepTime = 40; // 800ms total fade
+    const stepTime = 40;
     const volumeStep = startVolume / steps;
     let currentStep = 0;
 
@@ -1124,7 +1215,7 @@ const audioManager = (function() {
         clearInterval(fadeInterval);
         fadeInterval = null;
         bgm.pause();
-        bgm.currentTime = 0; // Force reset so it can't auto-resume
+        bgm.currentTime = 0;
         bgm.volume = 1.0;
         isPlaying = false;
         audioControl.classList.remove('playing');
@@ -1132,9 +1223,6 @@ const audioManager = (function() {
       }
     }, stepTime);
 
-    // SAFETY NET for Safari: also schedule a hard pause as backup
-    // If the interval gets paused (tab loses focus), this will still fire
-    // when tab regains focus or via setTimeout fallback
     setTimeout(() => {
       bgm.pause();
       bgm.currentTime = 0;
@@ -1335,6 +1423,17 @@ function startLoadingSequence() {
   blocks.forEach(block => observer.observe(block));
 })();
 
+/* ========== DOSEN CARDS REVEAL ========== */
+(function() {
+  const cards = document.querySelectorAll('.dosen-card');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.3, rootMargin: '0px 0px -10% 0px' });
+  cards.forEach(card => observer.observe(card));
+})();
+
 /* ========== FINALE PHOTO REVEAL ========== */
 (function() {
   const photo = document.getElementById('finale-photo');
@@ -1376,11 +1475,7 @@ function startLoadingSequence() {
   const playBtn = document.querySelector('.play-button');
   if (!playBtn) return;
 
-  // Use 'pointerdown' instead of 'click' so it fires BEFORE Safari starts navigating
-  // Also handle 'click' as fallback for keyboard/accessibility
   const stopMusic = () => {
-    // Safari iOS sometimes ignores fadeOut if tab loses focus
-    // Solution: do an immediate hard stop AND a fade in parallel
     audioManager.hardStop();
   };
 
@@ -1391,8 +1486,6 @@ function startLoadingSequence() {
 
 /* ========== STOP MUSIC ON TAB VISIBILITY CHANGE (Safari fix) ========== */
 (function() {
-  // When user switches tabs (e.g., to game tab), Safari may keep audio playing
-  // We listen for visibility change and stop audio if user navigated away via play button
   let userClickedPlay = false;
 
   const playBtn = document.querySelector('.play-button');
@@ -1407,7 +1500,6 @@ function startLoadingSequence() {
     }
   });
 
-  // Also stop on pagehide (Safari fires this when tab becomes inactive)
   window.addEventListener('pagehide', () => {
     if (userClickedPlay) audioManager.hardStop();
   });
